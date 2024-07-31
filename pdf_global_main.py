@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from netCDF4 import Dataset
 import numpy as np
 from glob import glob
 import xarray as xr 
-#import scipy.stats 
-import sys
 import time
 import logging 
 import shutil 
@@ -19,8 +18,8 @@ from math import isnan
 import  pandas as pd
 
 # ----------------------------------------------------------------------
-#                       ***  worker_func  ***
-# Purpose:  Fitting a PDF using stats.scipy.stats.fit 
+#                ***  Parallel processing_function  ***
+# Purpose: divide the input time series based on spatial domain 
 # ----------------------------------------------------------------------
 
 
@@ -53,7 +52,7 @@ def worker_func(mylist):
 # Define/upload the variable 'field'/values to be fitted
 # -----------------------------------------------------
   
-    #-- for daymean fiting parameters--
+    
     lsm =   xr.DataArray(np.zeros(((4,mlat,nlon_sub)), dtype=np.float32), dims=['time', 'lat','lon'])
     field = xr.DataArray(np.zeros(((nday, mlat,nlon_sub)), dtype=np.float64),dims=['time', 'lat','lon']) 
     #field[:,:,:] = pdf_var.isel(lon=slice(mylist[0][0],mylist[0][nlon_sub-1]+1)).load()[:,:,:] # Use this if we broadcast input values from the main function section
@@ -76,13 +75,7 @@ def worker_func(mylist):
                 field[iday,:,:] = np.mean(ds.isel(lon=slice(mylist[0][0],mylist[0][nlon_sub-1]+1)).load()[var_vector1], axis=0)# multiply with *0.01 for MSLP
                 iday+=1
             
-    #-- processing for anomaly time series          
-    dt=pd.date_range(start=start_date, end=end_date, freq='D') # freq=1D
-    ds_xarr= xr.DataArray(field,dims=['time','lat','lon'], coords=dict(time=dt))
-    ds_cl =ds_xarr.groupby('time.month').mean('time') 
-    ds_an= ds_xarr.groupby('time.month')-ds_cl
-
-# -----------------------------------------
+    
 # Define the FIT parameters, PDF  statistics
 # -----------------------------------------
     weibull_params = xr.DataArray(np.zeros((3, nlat,nlon_sub)))  # Use in case of 3 parameters PDF
@@ -318,7 +311,9 @@ if __name__=='__main__':
     fitcurve= target_pdf # target_pdf is retreived with the user input as pdf name 
     #fitcurve= "weib"    # Also, we can change the input PDF here from choices: "skew", "weib", "expweib", "laplace"
     
-    #--- We can apply the Anomaly funciton inside the main function instead of pre-porcessing under worker_function
+    
+    
+    #-- processing for anomaly time series          
     
     def anom_tseries(xarr,start_yr_mon_day) :
         dt= pd.date_range(start=start_yr_mon_day, end=end_date, freq='D') # freq=daily 
@@ -327,6 +322,8 @@ if __name__=='__main__':
         ds_an= ds_xarr.groupby('time.month')-ds_cl
         return ds_an
     
+  
+# -----------------------------------------
     ##---> wind_vectors =True, and we use this section to read windu and windv together here 
     ## to compute wind amplitude, then broadcast values of input variable (as ds_anom variable) for the field values 
     ## at the bgeining of programme if this section is used <---|
@@ -384,8 +381,8 @@ if __name__=='__main__':
     ncores=36  
     log.info(f' Divide your spatial domanin {len(longitude)} x {len(latitude)} for {ncores} cores')
     #print(f' Divide your spacial domanin {len(longitude)} x {len(latitude)} for {ncores} cores')
-    ilon = np.array_split(range(nlon), ncores)
     
+    ilon = np.array_split(range(nlon), ncores)
     mylist =  [[ilon[i]] for i in range(ncores)]
     print(mylist[1][0][0])
 
@@ -408,18 +405,17 @@ if __name__=='__main__':
         print(f" Assign {len(mylist[icore][0])}x{len(mylist[icore][1])} grid points to core{icore}")
 
     ############################################################################
-    # Worker finction distribute the processes in ncore and p.map distributes 
-    # a list of arguments to the same function (asynchronously), across the pool processes,
-    # and then waits until all function calls have completed before returning the list of results.
-    # return the result in the order they are started (NOT in the same order, they are arranged )
+    # Worker finction distribute the processes in ncore and p.map distributes function along the list
+    # return reulsts  are arranged )
     ############################################################################
     
     with Pool(processes=ncores) as p:     
         results = p.map(worker_func, mylist)
         #print('Results (pool):\n', results)
 
-    #---> Here, results are assigned to blank arrays 
+    #---> Here, results are assigned to empty arrays 
     ds0 = xr.open_dataset(files[0])
+    
     if (len(ds0.dims) == 3):
 
         kappa = xr.DataArray(np.zeros(((nlat,nlon)), dtype=np.float32), coords=[latitude, longitude], dims=['latitude','longitude'])
