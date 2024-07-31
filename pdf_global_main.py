@@ -27,7 +27,7 @@ def worker_func(mylist):
     process_id = os.getpid()
     start_time = datetime.now()
     log.info(" proc-ID "+str(process_id)+" started at {}".format(start_time))
-    #print(" proc-ID "+str(process_id)+" started at {}".format(start_time))
+    print(" proc-ID "+str(process_id)+" started at {}".format(start_time))
 
     nlon_sub = len(mylist[0])
     crd_lon     = mylist[1]
@@ -78,9 +78,9 @@ def worker_func(mylist):
     
 # Define the FIT parameters, PDF  statistics
 # -----------------------------------------
-    weibull_params = xr.DataArray(np.zeros((3, nlat,nlon_sub)))  # Use in case of 3 parameters PDF
-    #weibull_params = xr.DataArray(np.zeros(((4, nlat,nlon_sub)),dtype=np.float64)) # Use in case of 4 paramters PDF
-    weibull_params[:,:,:] = np.nan
+    pdf_params = xr.DataArray(np.zeros((3, nlat,nlon_sub)))  
+    #pdf_params = xr.DataArray(np.zeros(((4, nlat,nlon_sub)),dtype=np.float64)) # Use in case of 4 paramters PDF
+    pdf_params[:,:,:] = np.nan
     
     if (fitcurve == "weib"):
         for iz in range(ndepth):
@@ -120,8 +120,7 @@ def worker_func(mylist):
                     par_min=  [-6,ds_an.min(),5] 	
                     par_max=  [1, ds_an.max(),10] 
                     rand_parm =np.random.uniform(low=par_min, high =par_max, size =(n,3))
-                    #rand_parm= np.round(rand_parm,2)
-    #               #print(rand_parm)
+                    #rand_parm= np.round(rand_parm,2
                     field_min=10**10
                     for ipar in range(len(rand_parm)):
                         results = list(stats.skewnorm.fit(ds_an[:,iy,ix],rand_parm[ipar][0],loc=rand_parm[ipar][1],scale=rand_parm[ipar][2] ))
@@ -229,15 +228,15 @@ if __name__=='__main__':
     log.setLevel(logging.DEBUG)
     #log=None   
     log.info(" ------------------------------")
-    log.info(" | PDF DISTRIBUTION FITTING PROCEDURE")
-    log.info(" | python version="+sys.version)
-    log.info(" | Start time {}".format(date_start))
+    log.info("| PDF DISTRIBUTION FITTING")
+    log.info("| python version="+sys.version)
+    log.info("| Start time {}".format(date_start))
     log.info(" ------------------------------")
     log.info("")   
     #<--- Log file ends ---
 
     print(" ------------------------------")
-    print(" | DISTRIBUTION FITTING PROCEDURE")
+    print(" | PDF distribution fit ")
     print(" | python version="+sys.version)
     print(" | Start Date:", date_start)
     print(" ------------------------------")
@@ -249,7 +248,7 @@ if __name__=='__main__':
              yr_mon_list.append('%02i' %r + '%02i' %s)
     print("yr-month=",yr_mon_list)
     
-    #--- Reading ECMWF files from input years range 
+    #--- Reading Input files from input years range 
 
     files_dir= "/path/dir/" # Change with local target path/directory/ for input files
     
@@ -283,17 +282,17 @@ if __name__=='__main__':
         # crd_lat= latitude
         # crd_lon= longitude
         #---Applying Land-sea mask with -500 to ignore nan values   
-        lsm= ds_mesh.LSM.values 
-        lsm[lsm[:,:,:]==1]=-500
-        lsm[lsm[:,:,:]==0]=1
-        lsm[:,0:31,0:56]=-500
-        lsm[:,0:20,90:146]=-500
-        lsm[:,0:54,265:357]=-500
-        lsm[0,60:80,300:350]=-500
-        lsm[0,100:110,100:120]=-500
-        lsm[0,118:128,340:350]=-500
-        lsm[0,130:137,310:340]=-500
-        land= xr.DataArray(lsm , dims=['time','lat','lon'])
+        # lsm= ds_mesh.LSM.values 
+        # lsm[lsm[:,:,:]==1]=-500
+        # lsm[lsm[:,:,:]==0]=1
+        # lsm[:,0:31,0:56]=-500
+        # lsm[:,0:20,90:146]=-500
+        # lsm[:,0:54,265:357]=-500
+        # lsm[0,60:80,300:350]=-500
+        # lsm[0,100:110,100:120]=-500
+        # lsm[0,118:128,340:350]=-500
+        # lsm[0,130:137,310:340]=-500
+        # land= xr.DataArray(lsm , dims=['time','lat','lon'])
         nlon = len(crd_lon)
         nlat = len(crd_lat)
 
@@ -310,7 +309,6 @@ if __name__=='__main__':
     wind_vectors=False   # wind_vectors=True, if we load and windv together to compute wind amplitude inside main function here
     fitcurve= target_pdf # target_pdf is retreived with the user input as pdf name 
     #fitcurve= "weib"    # Also, we can change the input PDF here from choices: "skew", "weib", "expweib", "laplace"
-    
     
     
     #-- processing for anomaly time series          
@@ -406,7 +404,6 @@ if __name__=='__main__':
 
     ############################################################################
     # Worker finction distribute the processes in ncore and p.map distributes function along the list
-    # return reulsts  are arranged )
     ############################################################################
     
     with Pool(processes=ncores) as p:     
@@ -415,7 +412,7 @@ if __name__=='__main__':
 
     #---> Here, results are assigned to empty arrays 
     ds0 = xr.open_dataset(files[0])
-    
+
     if (len(ds0.dims) == 3):
 
         kappa = xr.DataArray(np.zeros(((nlat,nlon)), dtype=np.float32), coords=[latitude, longitude], dims=['latitude','longitude'])
