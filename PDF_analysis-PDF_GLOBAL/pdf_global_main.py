@@ -290,7 +290,6 @@ if __name__=='__main__':
         nlon = len(crd_lon)
         nlat = len(crd_lat)
         
-        
     nday= len(input_ar['step'])
     crd_time=range(nday)
     print("nday=",nday)
