@@ -1,0 +1,28 @@
+INFO:  ------------------------------
+INFO: | PDF DISTRIBUTION FITTING
+INFO: | python version=3.9.2 (default, Feb 28 2021, 17:03:44) 
+[GCC 10.2.1 20210110]
+INFO: | Start time 2024-08-01 18:02:50.260959
+INFO:  ------------------------------
+INFO: 
+INFO:  Configuration Paramiters:
+INFO:  Time Series:   year_start = 2023
+INFO:                 year_end = 2023
+INFO:                 month_start = 03
+INFO:                 month_end = 03
+INFO:                 input_variable = sotemair
+INFO:                 fitcurve  = weib
+INFO:  Divide your spatial domanin 1800 x 901 for 6 cores
+INFO:  Shape of the Pool data (6, 4)
+INFO:  Assign 300x1800 grid points to core0
+INFO:  Assign 300x1800 grid points to core1
+INFO:  Assign 300x1800 grid points to core2
+INFO:  Assign 300x1800 grid points to core3
+INFO:  Assign 300x1800 grid points to core4
+INFO:  Assign 300x1800 grid points to core5
+INFO:  proc-ID 3774127 started at 2024-08-01 18:02:50.856109
+INFO:  proc-ID 3774128 started at 2024-08-01 18:02:50.856257
+INFO:  proc-ID 3774129 started at 2024-08-01 18:02:50.856410
+INFO:  proc-ID 3774131 started at 2024-08-01 18:02:50.856820
+INFO:  proc-ID 3774132 started at 2024-08-01 18:02:50.856907
+INFO:  proc-ID 3774130 started at 2024-08-01 18:02:50.858146
