@@ -1,3 +1,4 @@
+
 # PDF_analysis
 
 #!/bin/bash
@@ -24,7 +25,6 @@ done
 #  var_name list = "T2M", "D2M", "MSl", "U10M", "V10M"  
 
 bsub -q p_short -P R000 -R  python geofit_zenedo.py 2006 2020 1 12 T2M skew; 
-
 
 
 ###### 2---- Instruction for PDF moments computation using the file moments_pdf.py -------
